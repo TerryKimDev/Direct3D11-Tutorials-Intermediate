@@ -72,6 +72,9 @@ Renderable gridRenderable;
 // Main mesh
 Renderable skyboxRenderable;
 
+//ground mesh
+Renderable groundRender;
+
 // Used for overriding the main mesh texture
 // with a generated white pixel texture to
 // simulate no texturing
@@ -546,7 +549,7 @@ void InitBlendState()
 	ZeroMemory(&rtbd, sizeof(rtbd));
 
 	rtbd.BlendEnable = true;
-	int ALPHA_MODE = 0;
+	int ALPHA_MODE = 1;
 	switch (ALPHA_MODE)
 	{
 	case 0: // object alpha
@@ -602,13 +605,13 @@ HRESULT InitSkybox()
 			mesh.vertexList.size());
 
 		// Load the Texture
-		std::string filename = "sunsetcube1024.dds";
+		std::string filename = "SkyDawn.dds";
 		hr = skyboxRenderable.CreateTextureFromFile(g_pd3dDevice, filename);
 		if (FAILED(hr))
 			return hr;
 
 		// Create the sampler state
-		hr = skyboxRenderable.CreateDefaultSampler(g_pd3dDevice);
+		//hr = skyboxRenderable.CreateDefaultSampler(g_pd3dDevice);
 
 		// Define the input layout
 		D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -627,7 +630,52 @@ HRESULT InitSkybox()
 	}
 	return hr;
 }
+HRESULT initground()
+{
+	HRESULT hr = S_OK;
 
+	//////////////////////////////////////////
+	//Create mesh render components
+	//////////////////////////////////////////
+	{
+		// Generate the geometry
+		SimpleMesh<SimpleVertex> mesh;
+		MeshUtils::makeGroundPNT(mesh);
+
+		// Create the vertex buffers from the generated SimpleMesh
+		hr = groundRender.CreateBuffers(
+			g_pd3dDevice,
+			mesh.indicesList,
+			(float*)mesh.vertexList.data(),
+			sizeof(SimpleVertex),
+			mesh.vertexList.size());
+
+		// Load the Texture
+		std::string filename = "ground.dds";
+		hr = groundRender.CreateTextureFromFile(g_pd3dDevice, filename);
+		if (FAILED(hr))
+			return hr;
+
+		// Create the sampler state
+		//hr = skyboxRenderable.CreateDefaultSampler(g_pd3dDevice);
+
+		// Define the input layout
+		D3D11_INPUT_ELEMENT_DESC lineLayoutDesc[] =
+		{
+			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		};
+
+		// Create the shaders
+		hr = groundRender.CreateVertexShaderAndInputLayoutFromFile(g_pd3dDevice, "Debug_VS.cso", lineLayoutDesc, ARRAYSIZE(lineLayoutDesc));
+		hr = groundRender.CreatePixelShaderFromFile(g_pd3dDevice, "Debug_PS.cso");
+
+
+		// Create the shader constant buffer
+		hr = groundRender.CreateConstantBufferVS(g_pd3dDevice, sizeof(TransformsConstantBuffer));
+	}
+	return hr;
+}
 HRESULT InitContent()
 {
 	InitDebugTexture();
@@ -637,6 +685,7 @@ HRESULT InitContent()
 	InitBlendState();
 	InitFBX();
 	InitSkybox();
+	initground();
 
 	HRESULT hr = S_OK;
 
@@ -653,7 +702,7 @@ HRESULT InitContent()
 		std::string filename;
 
 		// Load it!
-		LoadFBX("..//Assets//duck_tris.fbx", mesh, 0.01f, filename);
+		LoadFBX("..//Assets//duck_tris.fbx", mesh, 0.005f, filename);
 
 		// Create the vertex buffers from the generated SimpleMesh
 		hr = meshRenderable.CreateBuffers(
@@ -693,7 +742,7 @@ HRESULT InitContent()
 		renderables.push_back(meshRenderable);
 
 		// make a second duck, push_back makes a copy
-		meshRenderable.setPosition(3.0f, 0.0f, 0.0f);
+		meshRenderable.setPosition(2.0f, 1.6f, 0.4f);
 		meshRenderable.setRotation(XMMatrixRotationY(3.14159265359f));
 		renderables.push_back(meshRenderable);
 	}
@@ -748,7 +797,292 @@ HRESULT InitContent()
 		hr = meshRenderable.CreateConstantBufferVS(g_pd3dDevice, sizeof(TransformsConstantBuffer));
 		hr = meshRenderable.CreateConstantBufferPS(g_pd3dDevice, sizeof(LightsConstantBuffer));
 
-		meshRenderable.setPosition(0.0f, 0.0f, 0.0f);
+		meshRenderable.setPosition(2.0f, 0.0f, 1.0f);
+		meshRenderable.setRotation(XMMatrixRotationY(3.14159265359f*1.2));
+		renderables.push_back(meshRenderable);
+	}
+
+	//////////////////////////////////////////
+	//Create barrel components
+	//////////////////////////////////////////
+	{
+		Renderable meshRenderable;
+
+		// Generate the geometry
+		SimpleMesh<SimpleVertex> mesh;
+
+		// filename for texture file
+		std::string filename;
+
+		// Load it!
+		LoadFBX("..//Assets//barrel.fbx", mesh, 0.15f, filename);
+
+		// Create the vertex buffers from the generated SimpleMesh
+		hr = meshRenderable.CreateBuffers(
+			g_pd3dDevice,
+			mesh.indicesList,
+			(float*)mesh.vertexList.data(),
+			sizeof(SimpleVertex),
+			mesh.vertexList.size());
+
+		// Load the Texture when texture filename is valid
+		if (filename != "")
+		{
+			hr = meshRenderable.CreateTextureFromFile(g_pd3dDevice, "..//Assets//" + filename);
+			if (FAILED(hr))
+				return hr;
+
+			// Create the sampler state
+			hr = meshRenderable.CreateDefaultSampler(g_pd3dDevice);
+		}
+
+		// Define the input layout
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		// Create the shaders
+		hr = meshRenderable.CreateVertexShaderAndInputLayoutFromFile(g_pd3dDevice, "Tutorial06_VS.cso", layout, ARRAYSIZE(layout));
+		hr = meshRenderable.CreatePixelShaderFromFile(g_pd3dDevice, "Tutorial06_PS.cso");
+
+		// Create the shader constant buffer
+		hr = meshRenderable.CreateConstantBufferVS(g_pd3dDevice, sizeof(TransformsConstantBuffer));
+		hr = meshRenderable.CreateConstantBufferPS(g_pd3dDevice, sizeof(LightsConstantBuffer));
+
+		meshRenderable.setPosition(-1.f, 1.f, 1.0f);
+		meshRenderable.setRotation(XMMatrixRotationY(3.14159265359f));
+		meshRenderable.setRotation(XMMatrixRotationZ(3.14159265359f/2));
+		renderables.push_back(meshRenderable);
+	}
+
+	
+
+	//////////////////////////////////////////
+	//Create raft components
+	//////////////////////////////////////////
+	{
+		Renderable meshRenderable;
+
+		// Generate the geometry
+		SimpleMesh<SimpleVertex> mesh;
+
+		// filename for texture file
+		std::string filename;
+
+		// Load it!
+		LoadFBX("..//Assets//raft_tris.fbx", mesh, 0.005f, filename);
+
+		// Create the vertex buffers from the generated SimpleMesh
+		hr = meshRenderable.CreateBuffers(
+			g_pd3dDevice,
+			mesh.indicesList,
+			(float*)mesh.vertexList.data(),
+			sizeof(SimpleVertex),
+			mesh.vertexList.size());
+
+		// Load the Texture when texture filename is valid
+		if (filename != "")
+		{
+			hr = meshRenderable.CreateTextureFromFile(g_pd3dDevice, "..//Assets//" + filename);
+			if (FAILED(hr))
+				return hr;
+
+			// Create the sampler state
+			hr = meshRenderable.CreateDefaultSampler(g_pd3dDevice);
+		}
+
+		// Define the input layout
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		// Create the shaders
+		hr = meshRenderable.CreateVertexShaderAndInputLayoutFromFile(g_pd3dDevice, "Tutorial06_VS.cso", layout, ARRAYSIZE(layout));
+		hr = meshRenderable.CreatePixelShaderFromFile(g_pd3dDevice, "Tutorial06_PS.cso");
+
+		// Create the shader constant buffer
+		hr = meshRenderable.CreateConstantBufferVS(g_pd3dDevice, sizeof(TransformsConstantBuffer));
+		hr = meshRenderable.CreateConstantBufferPS(g_pd3dDevice, sizeof(LightsConstantBuffer));
+
+		meshRenderable.setPosition(3.0f, 1.2f, 6.0f);
+		meshRenderable.setRotation(XMMatrixRotationY(3.14159265359f / 3));
+		renderables.push_back(meshRenderable);
+	}
+	//////////////////////////////////////////
+	//Create bush components
+	//////////////////////////////////////////
+	{
+		Renderable meshRenderable;
+
+		// Generate the geometry
+		SimpleMesh<SimpleVertex> mesh;
+
+		// filename for texture file
+		MeshUtils::makeCrossHatchPNT(mesh, 0.5f);
+		std::string filename = "grass.dds";
+
+		// Create the vertex buffers from the generated SimpleMesh
+		hr = meshRenderable.CreateBuffers(
+			g_pd3dDevice,
+			mesh.indicesList,
+			(float*)mesh.vertexList.data(),
+			sizeof(SimpleVertex),
+			mesh.vertexList.size());
+
+
+		// Load the Texture
+		hr = meshRenderable.CreateTextureFromFile(g_pd3dDevice, filename);
+		if (FAILED(hr))
+			return hr;
+
+		// Create the sampler state
+		hr = meshRenderable.CreateDefaultSampler(g_pd3dDevice);
+
+		// Define the input layout
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		// Create the shaders
+		hr = meshRenderable.CreateVertexShaderAndInputLayoutFromFile(g_pd3dDevice, "Tutorial06_VS.cso", layout, ARRAYSIZE(layout));
+		hr = meshRenderable.CreatePixelShaderFromFile(g_pd3dDevice, "Tutorial06_PS.cso");
+
+		// Create the shader constant buffer
+		hr = meshRenderable.CreateConstantBufferVS(g_pd3dDevice, sizeof(TransformsConstantBuffer));
+		hr = meshRenderable.CreateConstantBufferPS(g_pd3dDevice, sizeof(LightsConstantBuffer));
+
+		//Create a bunch of bushes
+		meshRenderable.setPosition(-2.0f, 0.0f, -2.0f);
+		renderables.push_back(meshRenderable);
+
+		meshRenderable.setPosition(4.f, 0.0f, -1.0f);
+		renderables.push_back(meshRenderable);
+
+		meshRenderable.setPosition(0.0f, 0.0f, -3.0f);
+		renderables.push_back(meshRenderable);
+
+		meshRenderable.setPosition(1.5f, 0.0f, 3.0f);
+		renderables.push_back(meshRenderable);
+
+		meshRenderable.setPosition(2.0f, 0.0f, -4.0f);
+		renderables.push_back(meshRenderable);
+	}
+
+	//////////////////////////////////////////
+	//Create spark components
+	//////////////////////////////////////////
+	{
+		Renderable meshRenderable;
+
+		// Generate the geometry
+		SimpleMesh<SimpleVertex> mesh;
+
+		// filename for texture file
+		MeshUtils::makeCrossHatchPNT(mesh, 0.5f);
+		std::string filename = "spark.dds";
+
+		// Create the vertex buffers from the generated SimpleMesh
+		hr = meshRenderable.CreateBuffers(
+			g_pd3dDevice,
+			mesh.indicesList,
+			(float*)mesh.vertexList.data(),
+			sizeof(SimpleVertex),
+			mesh.vertexList.size());
+
+
+		// Load the Texture
+		hr = meshRenderable.CreateTextureFromFile(g_pd3dDevice, filename);
+		if (FAILED(hr))
+			return hr;
+
+		// Create the sampler state
+		hr = meshRenderable.CreateDefaultSampler(g_pd3dDevice);
+
+		// Define the input layout
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		// Create the shaders
+		hr = meshRenderable.CreateVertexShaderAndInputLayoutFromFile(g_pd3dDevice, "Tutorial06_VS.cso", layout, ARRAYSIZE(layout));
+		hr = meshRenderable.CreatePixelShaderFromFile(g_pd3dDevice, "Tutorial06_PS.cso");
+
+		// Create the shader constant buffer
+		hr = meshRenderable.CreateConstantBufferVS(g_pd3dDevice, sizeof(TransformsConstantBuffer));
+		hr = meshRenderable.CreateConstantBufferPS(g_pd3dDevice, sizeof(LightsConstantBuffer));
+
+		//Create a bunch of bushes
+		meshRenderable.setPosition(-2.3f, 3.0f, -2.0f);
+		renderables.push_back(meshRenderable);
+
+		meshRenderable.setPosition(4.1f, 2.0f, -1.0f);
+		renderables.push_back(meshRenderable);
+
+	}
+
+	//////////////////////////////////////////
+	//Create crate components
+	//////////////////////////////////////////
+	{
+		Renderable meshRenderable;
+
+		// Generate the geometry
+		SimpleMesh<SimpleVertex> mesh;
+
+		// filename for texture file
+		std::string filename;
+
+		// Load it!
+		LoadFBX("..//Assets//cube.fbx", mesh, 0.2f, filename);
+
+		// Create the vertex buffers from the generated SimpleMesh
+		hr = meshRenderable.CreateBuffers(
+			g_pd3dDevice,
+			mesh.indicesList,
+			(float*)mesh.vertexList.data(),
+			sizeof(SimpleVertex),
+			mesh.vertexList.size());
+
+		// Load the Texture when texture filename is valid
+		if (filename != "")
+		{
+			hr = meshRenderable.CreateTextureFromFile(g_pd3dDevice, "..//Assets//" + filename);
+			if (FAILED(hr))
+				return hr;
+
+			// Create the sampler state
+			hr = meshRenderable.CreateDefaultSampler(g_pd3dDevice);
+		}
+
+		// Define the input layout
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		// Create the shaders
+		hr = meshRenderable.CreateVertexShaderAndInputLayoutFromFile(g_pd3dDevice, "Tutorial06_VS.cso", layout, ARRAYSIZE(layout));
+		hr = meshRenderable.CreatePixelShaderFromFile(g_pd3dDevice, "Tutorial06_PS.cso");
+
+		// Create the shader constant buffer
+		hr = meshRenderable.CreateConstantBufferVS(g_pd3dDevice, sizeof(TransformsConstantBuffer));
+		hr = meshRenderable.CreateConstantBufferPS(g_pd3dDevice, sizeof(LightsConstantBuffer));
+
+		meshRenderable.setPosition(0.0f, -22.0f, 0.0f);
 		meshRenderable.setRotation(XMMatrixRotationY(3.14159265359f));
 		renderables.push_back(meshRenderable);
 	}
@@ -924,8 +1258,12 @@ void Update()
 		t = (timeCur - timeStart) / 1000.0f;
 	}
 
+	XMMATRIX zrot = XMMatrixRotationZ(-3.0f * t);
+	XMMATRIX yrot = XMMatrixRotationY(-5.0f * t);
 	// Rotate renderable 0
-	renderables[0].setRotation(g_World);
+	renderables[0].setRotation(zrot); 
+	renderables[10].setRotation(yrot); 
+	renderables[11].setRotation(yrot);
 
 	// Rotate cube around the origin
 	g_World = XMMatrixRotationY(t);
@@ -973,6 +1311,26 @@ void renderGrid()
 
 	gridRenderable.Bind(g_pImmediateContext);
 	gridRenderable.Draw(g_pImmediateContext);
+}
+
+void renderGround()
+{
+	// set up default render state
+	// no blending
+	g_pImmediateContext->OMSetBlendState(nullptr, 0, 0xffffffff);
+	// solid, no wireframe
+	g_pImmediateContext->RSSetState(rasterStateDefault);
+	// write z
+	g_pImmediateContext->OMSetDepthStencilState(pDSState, 1);
+
+	TransformsConstantBuffer cbDebug;
+	cbDebug.mWorld = XMMatrixIdentity();
+	cbDebug.mView = XMMatrixTranspose(g_View);
+	cbDebug.mProjection = XMMatrixTranspose(g_Projection);
+	g_pImmediateContext->UpdateSubresource(groundRender.constantBufferVS.Get(), 0, nullptr, &cbDebug, 0, 0);
+
+	groundRender.Bind(g_pImmediateContext);
+	groundRender.Draw(g_pImmediateContext);
 }
 
 // Mesh render routine that supports toggling texturing
@@ -1039,7 +1397,7 @@ void renderSkyBox()
 	// zero out the camera postion so the skybox renders 
 	// AT the camera postion
 	XMMATRIX tmpMat = g_View;
-	tmpMat.r[3] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	tmpMat.r[3] = { 0.0f, -0.5f, 0.0f, 1.0f };
 	cbDebug.mView = XMMatrixTranspose(tmpMat);
 	cbDebug.mProjection = XMMatrixTranspose(g_Projection);
 
@@ -1101,6 +1459,7 @@ void Render()
 	g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, color);
 	g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+	//renderGround();
 	//
 	// Render the grid
 	//

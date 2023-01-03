@@ -32,7 +32,7 @@ bool DEBUG_VIEW_ENABLED = true;
 bool RENDER_STYLE_TRANSPARENCY = false;
 bool RASTER_FILL_CULL_NONE = false;
 bool DEPTH_WRITE_ENABLED = true;
-bool SKYBOX_ENABLED = false;
+bool SKYBOX_ENABLED = true;
 
 HINSTANCE               g_hInst = nullptr;
 HWND                    g_hWnd = nullptr;

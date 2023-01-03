@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31005.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 2-2 - Alpha Blend State", "Week 2-2 - Alpha Blend State\Tutorial_2_2_AlphaBlendState.vcxproj", "{106619E1-59F3-462F-8751-6DAEC135F80F}"
 EndProject
@@ -10,9 +10,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{254A2917-C576-4483-87D6-2D4162BDD050}"
 	ProjectSection(SolutionItems) = preProject
 		Assets\barrel.fbx = Assets\barrel.fbx
+		Assets\barrelTris.fbx = Assets\barrelTris.fbx
 		Assets\barrel_diffuse.dds = Assets\barrel_diffuse.dds
 		Assets\barrel_diffuse.png = Assets\barrel_diffuse.png
-		Assets\barrelTris.fbx = Assets\barrelTris.fbx
 		Assets\Character_Female_Pirate_01.fbx = Assets\Character_Female_Pirate_01.fbx
 		Assets\Chest1-1.fbx = Assets\Chest1-1.fbx
 		Assets\Chest1.fbx = Assets\Chest1.fbx
@@ -22,15 +22,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{254A29
 		Assets\Crate.jpg = Assets\Crate.jpg
 		Assets\crate.png = Assets\crate.png
 		Assets\cube.fbx = Assets\cube.fbx
-		Assets\duck_tris.fbx = Assets\duck_tris.fbx
 		Assets\duckCM.dds = Assets\duckCM.dds
+		Assets\duck_tris.fbx = Assets\duck_tris.fbx
 		Assets\Texture_03_A.dds = Assets\Texture_03_A.dds
 		Assets\Texture_03_A.png = Assets\Texture_03_A.png
+		Assets\WaterBack.dds = Assets\WaterBack.dds
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 2-1 - Raster States", "Week 2-1 - Raster States\Tutorial_2_1_RasterStates.vcxproj", "{291B6A55-368E-4420-A0EB-FBE077B9F137}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 2-4 - FBX Project", "Week 2-4 - FBX Scene Project\Tutorial_2_4_FBX_Project.vcxproj", "{5CD980EF-7BB4-4881-BFB4-F97E12B4A9FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9EA2EA5D-FB1E-4D87-80C9-8A48D256C8A5}"
+	ProjectSection(SolutionItems) = preProject
+		Week 2-1 - Raster States\WaterBack.dds = Week 2-1 - Raster States\WaterBack.dds
+		Assets\WaterBack.png = Assets\WaterBack.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

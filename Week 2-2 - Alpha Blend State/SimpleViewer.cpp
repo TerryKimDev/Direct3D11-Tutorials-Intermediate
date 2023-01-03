@@ -561,14 +561,14 @@ void InitBlendState()
 	ZeroMemory(&rtbd, sizeof(rtbd));
 
 	rtbd.BlendEnable = true;
-	int ALPHA_MODE = 0;
+	int ALPHA_MODE = 2;
 	switch (ALPHA_MODE)
 	{
 	case 0: // object alpha
 	{
 		rtbd.SrcBlend = D3D11_BLEND_SRC_ALPHA;
 		rtbd.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		blendDesc.AlphaToCoverageEnable = false;
+		blendDesc.AlphaToCoverageEnable = true;
 		break;
 	}
 	case 1: // pixel alpha
@@ -613,13 +613,13 @@ HRESULT InitContent()
 		// Generate the geometry
 		SimpleMesh<SimpleVertex> mesh;
 		// Set up a crate
-		MeshUtils::makeCubePNT(mesh);
-		std::string filename = "crate.dds";
+		//MeshUtils::makeCubePNT(mesh);
+		//std::string filename = "grass.dds"; //"crate.dds";
 
 		// Set up a bush
-		//MeshUtils::makeCrossHatchPNT(mesh, 2.0f);
+		MeshUtils::makeCrossHatchPNT(mesh, 2.0f);
 		//std::string filename = "grass.dds";
-		//std::string filename = "spark.dds";
+		std::string filename = "spark.dds";
 
 		// Create the vertex buffers from the generated SimpleMesh
 		hr = meshRenderable.CreateBuffers(
@@ -966,7 +966,7 @@ void Render()
 
 	// Draw one or 3
 	// Sparks
-	if (true)
+	if (false)
 	{
 		renderMesh(cb1);
 		//

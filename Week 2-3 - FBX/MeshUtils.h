@@ -2,8 +2,11 @@
 #include <directxmath.h>
 #include <vector>
 
+
+
 using namespace std;
 using namespace DirectX;
+
 
 struct SimpleVertex
 {
@@ -21,6 +24,68 @@ struct SimpleMesh
 
 namespace MeshUtils
 {
+	void Compactify(SimpleMesh<SimpleVertex>& simpleMesh)
+	{
+		// Using vectors because we don't know what size we are
+		// going to need until the end
+		vector<SimpleVertex> compactedVertexList;
+		vector<int> indicesList;
+
+		// initialize running index
+		int compactedIndex = 0;
+
+		// for each vertex in the expanded array
+		// compare to the compacted array for a matching
+		// vertex, if found, skip adding and set the index
+		for (SimpleVertex vertSimpleMesh : simpleMesh.vertexList)
+		{
+			bool found = false;
+			int foundIndex = 0;
+			// search for match with the rest in the array
+			for (SimpleVertex vertCompactedList : compactedVertexList)
+			{
+				if (vertSimpleMesh.Pos.x == vertCompactedList.Pos.x &&
+					vertSimpleMesh.Pos.y == vertCompactedList.Pos.y &&
+					vertSimpleMesh.Pos.z == vertCompactedList.Pos.z &&
+					vertSimpleMesh.Normal.x == vertCompactedList.Normal.x &&
+					vertSimpleMesh.Normal.y == vertCompactedList.Normal.y &&
+					vertSimpleMesh.Normal.z == vertCompactedList.Normal.z &&
+					vertSimpleMesh.Tex.x == vertCompactedList.Tex.x &&
+					vertSimpleMesh.Tex.y == vertCompactedList.Tex.y
+					)
+				{
+					//cout << "Match at " << i << "-";
+					indicesList.push_back(foundIndex);
+					found = true;
+					break;
+				}
+				foundIndex++;
+			}
+			// didn't find a duplicate so keep (push back) the current vertex
+			// and increment the index count and push back that index as well
+			if (!found)
+			{
+				compactedVertexList.push_back(vertSimpleMesh);
+				indicesList.push_back(compactedIndex);
+				compactedIndex++;
+			}
+		}
+
+		int numIndices = (int)simpleMesh.indicesList.size();
+		int numVertices = (int)simpleMesh.vertexList.size();
+
+		// print out some stats
+		cout << "index count BEFORE/AFTER compaction " << numIndices << endl;
+		cout << "vertex count UNOPTIMIZED (SimpleMesh In): " << numVertices << endl;
+		cout << "vertex count AFTER compaction (SimpleMesh Out): " << compactedVertexList.size() << endl;
+		cout << "Size reduction: " << ((numVertices - compactedVertexList.size()) / (float)numVertices) * 100.00f << "%" << endl;
+		cout << "or " << (compactedVertexList.size() / (float)numVertices) << " of the expanded size" << endl;
+
+		// copy working data to the global SimpleMesh
+		simpleMesh.indicesList = indicesList;
+		simpleMesh.vertexList = compactedVertexList;
+	}
+
 	// create a simple cube with normals and texture coordinates
 	void makeCubePNT(SimpleMesh<SimpleVertex>& mesh)
 	{

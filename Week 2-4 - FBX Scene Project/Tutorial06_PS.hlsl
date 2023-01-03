@@ -39,8 +39,9 @@ float4 PS(PS_INPUT input) : SV_Target
         finalColor += saturate(dot((float3) vLightDir[i], input.Norm) * vLightColor[i]);
     }
     //Alpha type 0 use 0.75f;
-    //Alpha type 1 and 2 use 1.0f;
-    //finalColor.a = 0.75f;
+    //Alpha type 1 and 2 use 1.0f;   	
+
+    finalColor.a = 1.0f;
     finalColor *= txDiffuse.Sample(samLinear, input.Tex);
     return finalColor;
 }
